@@ -28,3 +28,54 @@ print("\n清洗后的数据：")
 print(df)
 print("清洗后有效数据行数：", len(df))
 print("销售总额：", df["销售额"].sum(), "元")
+
+# 第七步：按照销售员统计销售额
+salesperson_summary = (
+    df.groupby("销售员")["销售额"].sum().reset_index()
+)
+
+print("\n按销售员统计：")
+print(salesperson_summary)
+
+# 第八步：按照地区统计销售额
+region_summary = (
+    df.groupby("地区")["销售额"].sum().reset_index()
+)
+
+print("\n按地区统计：")
+print(region_summary)
+
+# 第九步：计算月度销售总额
+df["日期"] = pd.to_datetime(df["日期"])
+df["月份"] = df["日期"].dt.strftime("%Y-%m")
+
+monthly_summary = (
+    df.groupby("月份")["销售额"].sum().reset_index()
+)
+
+print("\n月度销售额统计：")
+print(monthly_summary)
+
+# 第十步：生成 Excel 销售报表
+with pd.ExcelWriter("report.xlsx", engine="openpyxl") as writer:
+
+    # 工作表1：清洗后的销售明细
+    df.to_excel(writer, sheet_name="明细清洗后", index=False)
+
+    # 工作表2：按照销售员统计
+    salesperson_summary.to_excel(
+        writer, sheet_name="按销售员", index=False
+    )
+
+    # 工作表3：按照地区统计
+    region_summary.to_excel(
+        writer, sheet_name="按地区", index=False
+    )
+
+    # 工作表4：销售总览
+    monthly_summary.to_excel(
+        writer, sheet_name="总览", index=False
+    )
+
+print("\nExcel 报表生成成功！")
+print("文件名称：report.xlsx")
