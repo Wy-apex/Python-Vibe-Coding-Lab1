@@ -3,7 +3,38 @@
 import pandas as pd
 
 # 第一步：读取原始 Excel 文件
-df = pd.read_excel("sales_raw.xlsx")
+
+from pathlib import Path
+import sys
+
+# 检查原始销售文件是否存在
+file_path = Path("sales_raw.xlsx")
+
+if not file_path.is_file():
+    print("错误：找不到 sales_raw.xlsx 文件，请检查文件是否存在！")
+    sys.exit(1)
+
+# 文件存在后，再读取 Excel
+df = pd.read_excel(file_path)
+
+# 检查 Excel 是否包含全部必要字段
+required_columns = ["日期", "销售员", "产品", "数量", "单价", "地区"]
+
+missing_columns = [
+    col for col in required_columns if col not in df.columns
+]
+
+if missing_columns:
+    print("错误：Excel 文件缺少必要字段：" + "、".join(missing_columns))
+    sys.exit(1)
+
+print("字段检查通过，Excel 包含全部必要字段！")
+
+# 检查 Excel 是否没有销售数据
+if df.empty:
+    print("错误：Excel 文件为空，没有销售数据！")
+    sys.exit(1)
+
 
 print("原始数据：")
 print(df)
@@ -18,6 +49,11 @@ df = df[df["数量"] > 0]
 
 # 第四步：按照全部字段删除重复记录
 df = df.drop_duplicates()
+
+# 检查数据清洗后是否还有有效记录
+if df.empty:
+    print("错误：数据清洗后没有有效销售记录！")
+    sys.exit(1)
 
 # 第五步：计算每条记录的销售额
 df = df.copy()
